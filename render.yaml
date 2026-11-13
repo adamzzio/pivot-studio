@@ -12,6 +12,10 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn run:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
     healthCheckPath: /converter
+    # DNS: apex pivotstudio.my.id → A 216.24.57.1 (or ALIAS/ANAME → pivot-studio.onrender.com),
+    # www → CNAME pivot-studio.onrender.com. Render redirects www to apex automatically.
+    domains:
+      - pivotstudio.my.id
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.7

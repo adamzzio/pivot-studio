@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Pivot Table{% endblock %}
+{% block heading %}Pivot Table{% endblock %}
+{% block subheading %}Unggah XLSX, susun pivot secara interaktif, ekspor, dan minta insight AI.{% endblock %}
+{% block content %}
+<div class="stack-lg">
+
+  <section class="card" aria-labelledby="src-title">
+    <div class="card-head">
+      <h2 id="src-title">1. Sumber data</h2>
+      <button type="button" class="btn btn-ghost btn-sm" id="btn-clear-all" hidden>Hapus semua file</button>
+    </div>
+    <div class="card-body stack">
+      <div id="dropzone" class="dropzone dropzone-sm" tabindex="0" role="button" aria-label="Pilih atau seret file XLSX">
+        <p><strong>Seret satu atau lebih file XLSX ke sini</strong> atau klik untuk memilih</p>
+        <p class="muted">Setiap sheet dipakai sebagai sumber terpisah. Pilih satu sheet untuk dianalisis.</p>
+        <input type="file" id="file-input" accept=".xlsx" multiple hidden>
+      </div>
+      <div id="upload-progress" class="progress" hidden><div class="progress-bar"></div></div>
+      <div id="files-list" class="stack-sm"></div>
+    </div>
+  </section>
+
+  <section class="card" id="preview-card" aria-labelledby="prev-title" hidden>
+    <div class="card-head">
+      <div><h2 id="prev-title">2. Data dan tipe kolom</h2><p class="muted" id="prev-sub"></p></div>
+    </div>
+    <div class="card-body stack">
+      <div class="segmented" role="tablist" aria-label="Tampilan data">
+        <button type="button" role="tab" class="seg active" data-tab="preview" aria-selected="true">Preview</button>
+        <button type="button" role="tab" class="seg" data-tab="types" aria-selected="false">Tipe kolom</button>
+      </div>
+      <div id="tab-preview">
+        <div class="table-wrap"><table class="data-table" id="preview-table"></table></div>
+        <div class="pager"><button type="button" class="btn btn-outline btn-sm" id="prev-prev">Sebelumnya</button><span class="muted" id="prev-info"></span><button type="button" class="btn btn-outline btn-sm" id="prev-next">Berikutnya</button></div>
+      </div>
+      <div id="tab-types" hidden>
+        <p class="muted">Tipe dideteksi otomatis. Ubah bila perlu. Angka dengan leading zero dibiarkan sebagai teks.</p>
+        <div id="types-list" class="types-grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="builder-card" aria-labelledby="bld-title" hidden>
+    <div class="card-head">
+      <div><h2 id="bld-title">3. Konfigurasi pivot</h2><p class="muted" id="config-summary"></p></div>
+      <button type="button" class="btn btn-outline btn-sm" id="btn-reset">Reset konfigurasi</button>
+    </div>
+    <div class="card-body stack">
+      <div class="builder">
+        <div class="field-panel">
+          <label class="sr-only" for="field-search">Cari field</label>
+          <input type="search" id="field-search" class="input" placeholder="Cari field...">
+          <div id="field-list" class="field-list" aria-label="Daftar field"></div>
+          <p class="muted small">Seret field ke area di kanan, atau gunakan menu Tambah di tiap area.</p>
+        </div>
+        <div class="zones" id="zones"></div>
+      </div>
+      <div class="options">
+        <label class="field"><span>Desimal</span><input type="number" id="opt-decimals" class="input" min="0" max="8" value="2"></label>
+        <label class="check"><input type="checkbox" id="opt-sub" checked><span>Subtotal</span></label>
+        <label class="check"><input type="checkbox" id="opt-grand" checked><span>Grand total</span></label>
+        <label class="field"><span>Urutkan baris</span><select id="opt-sort-by" class="select"><option value="label">Label</option><option value="value">Nilai metrik</option></select></label>
+        <label class="field" id="wrap-sort-metric" hidden><span>Metrik</span><select id="opt-sort-metric" class="select"></select></label>
+        <label class="field"><span>Arah baris</span><select id="opt-sort-dir" class="select"><option value="asc">Naik (A-Z)</option><option value="desc">Turun (Z-A)</option></select></label>
+        <label class="field"><span>Arah kolom</span><select id="opt-col-dir" class="select"><option value="asc">Naik (A-Z)</option><option value="desc">Turun (Z-A)</option></select></label>
+      </div>
+      <div id="filter-chips" class="muted small"></div>
+    </div>
+  </section>
+
+  <section class="card" id="result-card" aria-labelledby="res-title" hidden>
+    <div class="card-head">
+      <div><h2 id="res-title">Hasil pivot</h2><p class="muted" id="res-sub"></p></div>
+      <button type="button" class="btn btn-primary btn-sm" id="btn-export" disabled>Export to XLSX</button>
+    </div>
+    <div class="card-body stack">
+      <div id="res-notes" class="stack-sm"></div>
+      <div id="res-body"></div>
+      <div class="pager" id="res-more" hidden><span class="muted" id="res-more-info"></span><button type="button" class="btn btn-outline btn-sm" id="btn-more">Muat lebih banyak</button></div>
+    </div>
+  </section>
+
+  <section class="card" id="ai-card" aria-labelledby="ai-title" hidden>
+    <div class="card-head">
+      <div><h2 id="ai-title">AI Insights</h2><p class="muted">Ringkasan hasil pivot oleh model di Groq. Data pivot yang dipilih dikirim ke Groq saat Anda menekan tombol.</p></div>
+      <span class="badge badge-warn" id="ai-stale" hidden>Pivot berubah, perbarui insight</span>
+    </div>
+    <div class="card-body stack">
+      <div class="options">
+        <label class="field"><span>Bahasa output</span><select id="ai-lang" class="select"><option value="id">Indonesia</option><option value="en">English</option></select></label>
+        <label class="field"><span>Panjang analisis</span><select id="ai-len" class="select"><option value="ringkas">Ringkas</option><option value="detail">Detail</option></select></label>
+        <div class="field"><span class="sr-only">Aksi</span><button type="button" class="btn btn-primary" id="btn-ai" disabled>Generate Insights</button></div>
+      </div>
+      <div id="ai-body"></div>
+    </div>
+  </section>
+
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/pivot.js') }}"></script>{% endblock %}

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>{% block title %}Pivot Studio{% endblock %} | Pivot Studio</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+<a class="skip-link" href="#main">Lewati ke konten utama</a>
+<div class="app" id="app">
+  <aside class="sidebar" id="sidebar" aria-label="Navigasi utama">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+      </span>
+      <span class="brand-text"><strong>Pivot Studio</strong><small>Converter dan analisis XLSX</small></span>
+    </div>
+    <nav class="nav">
+      <a href="{{ url_for('converter.page') }}" class="nav-item {% if request.blueprint == 'converter' %}active{% endif %}" {% if request.blueprint == 'converter' %}aria-current="page"{% endif %} title="CSV/XLSX Converter">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+        <span class="nav-label">CSV/XLSX Converter</span>
+      </a>
+      <a href="{{ url_for('pivot.page') }}" class="nav-item {% if request.blueprint in ('pivot', 'insights') %}active{% endif %}" {% if request.blueprint in ('pivot', 'insights') %}aria-current="page"{% endif %} title="Pivot Table">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18"/></svg>
+        <span class="nav-label">Pivot Table</span>
+      </a>
+    </nav>
+    <div class="sidebar-foot">
+      <span class="dev-text">Dikembangkan oleh <a href="https://github.com/adamzzio" target="_blank" rel="noopener noreferrer">Adam Maurizio</a></span>
+    </div>
+  </aside>
+  <div class="backdrop" id="backdrop" hidden></div>
+
+  <div class="main-col">
+    <header class="topbar">
+      <button class="btn btn-ghost btn-icon" id="menu-btn" type="button" aria-label="Buka atau ciutkan sidebar" aria-controls="sidebar" aria-expanded="true">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="topbar-title">
+        <h1>{% block heading %}{% endblock %}</h1>
+        <p>{% block subheading %}{% endblock %}</p>
+      </div>
+    </header>
+    <main id="main" class="content" tabindex="-1">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+<div id="toasts" class="toasts" role="region" aria-label="Notifikasi" aria-live="polite"></div>
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

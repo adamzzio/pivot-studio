@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}CSV/XLSX Converter{% endblock %}
+{% block heading %}CSV/XLSX Converter{% endblock %}
+{% block subheading %}Ubah CSV menjadi XLSX atau sebaliknya, langsung di browser.{% endblock %}
+{% block content %}
+<section class="card narrow" aria-labelledby="conv-title">
+  <div class="card-head"><h2 id="conv-title">Konversi file</h2></div>
+  <div class="card-body stack">
+    <div class="segmented" role="tablist" aria-label="Arah konversi">
+      <button type="button" role="tab" class="seg active" data-mode="csv-to-xlsx" aria-selected="true">CSV ke XLSX</button>
+      <button type="button" role="tab" class="seg" data-mode="xlsx-to-csv" aria-selected="false">XLSX ke CSV</button>
+    </div>
+
+    <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Pilih atau seret file ke sini">
+      <svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>
+      <p><strong>Seret file ke sini</strong> atau klik untuk memilih</p>
+      <p class="muted" id="dz-hint">Format yang diterima: .csv</p>
+      <input type="file" id="file-input" accept=".csv" hidden>
+    </div>
+
+    <div id="file-info" class="file-info" hidden>
+      <div class="file-info-main">
+        <div><strong id="fi-name"></strong><div class="muted" id="fi-meta"></div></div>
+        <button type="button" class="btn btn-outline btn-sm" id="btn-remove">Hapus file</button>
+      </div>
+      <div class="muted" id="fi-detect"></div>
+    </div>
+
+    <div id="options" class="grid-opts" hidden>
+      <div id="opts-csv" class="contents">
+        <label class="field"><span>Delimiter</span>
+          <select id="o-delim" class="select"><option value="auto">Otomatis</option><option value="comma">Koma (,)</option><option value="semicolon">Titik koma (;)</option><option value="tab">Tab</option><option value="pipe">Pipa (|)</option></select></label>
+        <label class="field"><span>Encoding</span>
+          <select id="o-enc" class="select"><option value="auto">Otomatis</option><option value="utf-8">UTF-8</option><option value="utf-8-sig">UTF-8 with BOM</option><option value="windows-1252">Windows-1252</option></select></label>
+        <label class="field wide"><span>Penanganan tipe data</span>
+          <select id="o-type" class="select"><option value="text">Pertahankan semua sebagai teks (paling aman)</option><option value="auto">Deteksi angka otomatis (leading zero tetap teks)</option></select></label>
+      </div>
+      <div id="opts-xlsx" class="contents" hidden>
+        <label class="field wide"><span>Sheet yang diekspor</span><select id="o-sheet" class="select"></select></label>
+        <label class="field"><span>Delimiter CSV</span>
+          <select id="o-delim2" class="select"><option value="comma">Koma (,)</option><option value="semicolon">Titik koma (;)</option><option value="tab">Tab</option><option value="pipe">Pipa (|)</option></select></label>
+        <label class="field"><span>Encoding CSV</span>
+          <select id="o-enc2" class="select"><option value="utf-8-sig">UTF-8 with BOM (cocok untuk Excel)</option><option value="utf-8">UTF-8</option></select></label>
+      </div>
+    </div>
+
+    <div class="alert alert-info" id="xlsx-note" hidden>
+      <span>CSV hanya berisi satu sheet. Formatting, formula, dan fitur khusus XLSX tidak dipertahankan.</span>
+    </div>
+
+    <div id="error" class="alert alert-error" role="alert" hidden></div>
+
+    <div class="actions">
+      <button type="button" class="btn btn-primary" id="btn-convert" disabled>Convert</button>
+    </div>
+
+    <div id="progress" class="progress" hidden aria-label="Memproses"><div class="progress-bar"></div></div>
+
+    <div id="result" class="alert alert-success" hidden>
+      <div class="stack-sm">
+        <strong>Konversi berhasil</strong>
+        <div id="result-notes" class="muted"></div>
+        <div><a id="btn-download" class="btn btn-primary" href="#">Unduh hasil</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/converter.js') }}"></script>{% endblock %}

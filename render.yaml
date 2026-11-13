@@ -1,0 +1,29 @@
+# Pivot Studio on Render — Flask app served by gunicorn.
+# Free tier: disk is ephemeral; uploads in instance/uploads are temp (FILE_TTL_HOURS) so that is fine.
+# 1 worker keeps RAM under 512 MB (pandas); threads handle concurrent requests.
+# After first deploy: set GROQ_API_KEY in Dashboard → Environment.
+
+services:
+  - type: web
+    name: pivot-studio
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn run:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
+    healthCheckPath: /converter
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: SECRET_KEY
+        generateValue: true
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-120b
+      - key: GROQ_TIMEOUT
+        value: "60"
+      - key: FILE_TTL_HOURS
+        value: "12"
+      - key: MAX_CONTENT_MB
+        value: "50"
